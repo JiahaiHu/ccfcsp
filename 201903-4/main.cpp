@@ -40,6 +40,7 @@ int main() {
 
                 pair<int,int> cmd = (*it).front();
                 for (auto i = it; i != proc.end(); ++i) {
+                    if ((*i).empty()) continue;
                     pair<int,int> _cmd = (*i).front();
                     if (it == i) continue;
                     if (cmd.first == _cmd.first && cmd.second == _cmd.second) {
