@@ -1,19 +1,34 @@
 #include <bits/stdc++.h>
 #define MAX_N 10000
-#define INF 0x3f3f3f3f  // possible longest path: 10^4(max m) * 10^3(max w)
 
 using namespace std;
 
+vector<pair<int, int> > path[MAX_N + 1]; // second: length of path
 int dis[MAX_N + 1][MAX_N + 1];  // distance
+ 
+int min_connected_with[MAX_N + 1];  // min node connected with
 
-void update(int a, int b, int c) {
-    // cout << c << ' ' << dis[a][b] << endl;
-    if (c < dis[a][b]) {
-        dis[a][b] = c;
-        dis[b][a] = c;
+int update_min(int x) {
+    int min_with_x = min_connected_with[x];
+    if (min_with_x == x) return x;
+    if (min_with_x > min_connected_with[min_with_x]) {  // min changed
+        min_connected_with[x] = update_min(min_with_x);
     }
+    return min_connected_with[x];
 }
-
+ 
+void connect(int n, int m) {
+    int a = update_min(n);
+    int b = update_min(m);
+    if (a == b) return;
+    min_connected_with[a] = min(a, b);
+    min_connected_with[b] = min(a, b);
+}
+ 
+bool is_connected(int a,int b) {
+    return update_min(a) == update_min(b);
+}
+ 
 int main() {
     int n, m, k;
     vector<int> engine;
@@ -29,43 +44,72 @@ int main() {
     }
 
     memset(dis, 0x3f, sizeof(dis));
-    for (int i = 1; i <= n; ++i) {
+    for (int i = 1; i <= n; i++) {
         dis[i][i] = 0;
+    }
+
+    for (int i = 1; i <= MAX_N; i++) {
+        min_connected_with[i] = i;
     }
 
     while (m--) {
         int a, b, c;
         cin >> a >> b >> c;
-        update(a, b, c);
+        connect(a, b);
+        path[a].push_back({b, c});
+        path[b].push_back({a, c});
     }
 
-    for (int k = 1; k <= n; ++k) {
-        for (int i = 1; i <= n; ++i) {
-            for (int j = 1; j <= n; ++j) {
-                if (dis[i][k] != INF && dis[k][j] != INF &&
-                    dis[i][k] + dis[k][j] < dis[i][j])
-                {
-                    // cout << i << ' ' << k << ' ' << j << endl;
-                    // cout << dis[i][j] << ' ' << dis[i][k] << ' ' << dis[k][j] << endl;
-                    dis[i][j] = dis[i][k] + dis[k][j];
-                    dis[j][i] = dis[i][k] + dis[k][j];
+    
+    priority_queue<pair<int, int> > q;
+    for (auto i : engine) {
+        while (!q.empty()) {
+            q.pop();
+        }
+
+        for (int j = 1; j <= i; j++) {
+            if (dis[i][j] != dis[0][0]) {
+                q.push({0, j}); // connected node
+            }
+        }
+
+        int vis[n + 1]; // visited
+        for (int j = 1; j <= n; ++j) {
+            vis[j] = 0;
+        }
+
+        while (!q.empty()) {
+            int b = q.top().second;
+            q.pop();
+
+            if (vis[b]) continue;
+            vis[b] = 1;
+
+            for (int j = 0; j < path[b].size(); j++) {
+                int node = path[b][j].first;
+                int len = path[b][j].second;
+                if (vis[node]) {
+                    continue;
+                }
+                if (dis[i][b] + len < dis[i][node]) {
+                    dis[i][node] = dis[i][b] + len;
+                    q.push({-dis[i][node], node});
                 }
             }
         }
     }
 
     int len[MAX_N + 1];
-    for (int i = 1; i <= n; ++i){
+    for (int i = 1; i <= n; i++) {
         int num = 0;
         long long sum = 0;
-        for (auto x : engine){
-            if (dis[i][x] != INF){
-                // cout << i << ' ' << x << ' ' << dis[i][x] << endl;
-                len[num++] = dis[i][x];
+        for (auto x : engine) {
+            if (is_connected(i, x)) {
+                len[num++] = dis[x][i];
             }
         }
         sort(len, len + num);
-        for (int j = 0; j < min(num, k); ++j){
+        for (int j = 0; j < min(num, k); j++) {
             sum += len[j];
         }
         cout << sum;
