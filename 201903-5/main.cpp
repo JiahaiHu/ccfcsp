@@ -6,29 +6,6 @@ using namespace std;
 vector<pair<int, int> > path[MAX_N + 1]; // second: length of path
 int dis[MAX_N + 1][MAX_N + 1];  // distance
  
-int min_connected_with[MAX_N + 1];  // min node connected with
-
-int update_min(int x) {
-    int min_with_x = min_connected_with[x];
-    if (min_with_x == x) return x;
-    if (min_with_x > min_connected_with[min_with_x]) {  // min changed
-        min_connected_with[x] = update_min(min_with_x);
-    }
-    return min_connected_with[x];
-}
- 
-void connect(int n, int m) {
-    int a = update_min(n);
-    int b = update_min(m);
-    if (a == b) return;
-    min_connected_with[a] = min(a, b);
-    min_connected_with[b] = min(a, b);
-}
- 
-bool is_connected(int a,int b) {
-    return update_min(a) == update_min(b);
-}
- 
 int main() {
     int n, m, k;
     vector<int> engine;
@@ -48,14 +25,9 @@ int main() {
         dis[i][i] = 0;
     }
 
-    for (int i = 1; i <= MAX_N; i++) {
-        min_connected_with[i] = i;
-    }
-
     while (m--) {
         int a, b, c;
         cin >> a >> b >> c;
-        connect(a, b);
         path[a].push_back({b, c});
         path[b].push_back({a, c});
     }
@@ -68,7 +40,7 @@ int main() {
         }
 
         for (int j = 1; j <= i; j++) {
-            if (dis[i][j] != dis[0][0]) {
+            if (dis[i][j] != dis[0][0]) {   // dis[0][0] representing INFINITY
                 q.push({0, j}); // connected node
             }
         }
@@ -104,7 +76,7 @@ int main() {
         int num = 0;
         long long sum = 0;
         for (auto x : engine) {
-            if (is_connected(i, x)) {
+            if (dis[x][i] != dis[0][0]) {
                 len[num++] = dis[x][i];
             }
         }
