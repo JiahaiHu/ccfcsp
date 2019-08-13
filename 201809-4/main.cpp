@@ -6,10 +6,16 @@ using namespace std;
 int t[MAX_N + 1];   // today
 int y[MAX_N + 1];   // yesterday
 int n;
+bool solved[MAX_N + 1][MAX_N + 1][MAX_N + 1];
 
 void dfs(int i) {
     int a = y[i - 1];
     int b = y[i];
+
+    if (solved[i][a][b]) {  // already solved but not the answer
+        return;
+    }
+    solved[i][a][b] = true;
 
     if (i == n) {
         if ((a + b) / 2 == t[n]) {
