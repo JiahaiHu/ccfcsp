@@ -15,7 +15,7 @@ int main() {
         int t = a.front();
         a.pop();
         ++num;
-        if (num % k == 0 || num - k % 10 == 0) {
+        if (num % k == 0 || num % 10 == k) {
             --n;
         } else {
             a.push(t);
