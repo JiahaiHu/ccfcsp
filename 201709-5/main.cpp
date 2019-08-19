@@ -34,6 +34,9 @@ int main() {
         int l, r, v;
         if (opt == 1) {
             cin >> l >> r >> v;
+            if (v == 1) {
+                continue;
+            }
             for (int i = l; i <= r; ++i) {
                 if (num[i] % v == 0) {
                     int temp = num[i];
