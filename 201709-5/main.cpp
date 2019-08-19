@@ -38,7 +38,7 @@ int main() {
                 continue;
             }
             for (int i = l; i <= r; ++i) {
-                if (num[i] % v == 0) {
+                if (num[i] >= v && num[i] % v == 0) {
                     int temp = num[i];
                     num[i] /= v;
                     update(i, num[i] - temp);
