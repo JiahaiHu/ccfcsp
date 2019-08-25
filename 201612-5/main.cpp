@@ -5,7 +5,7 @@
 
 using namespace std;
 
-int n, m, S;
+int n, m;
 double p[MAX_N + 1][MAX_N + 1]; // p[i][j]: probability that i win j
 vector<int> q;  // query
 
@@ -95,8 +95,46 @@ int main() {
     }
 
     // gauss elimination
-    // TODO:
-    // ...
+    int h = 1;
+    int k = 1;
+    while (h < MAX_S && k <= MAX_S) {
+        // Choosing the largest absolute value of the pivot
+        // improves the numerical stability of the algorithm,
+        // when floating point is used for representing numbers.
+        int max_i = k;
+        for (int i = k + 1; i < MAX_S; ++i) {
+            if ( fabs(matrix[i][k]) > fabs(matrix[max_i][k]) ) {
+                max_i = i;
+            }
+        }
+        if (matrix[max_i][k] == 0) {
+            ++k;
+        } else {
+            // swap row h and row max_i
+            for (int j = 1; j <= MAX_S; ++j) {
+                swap(matrix[h][j], matrix[max_i][j]);
+            }
+            // elimination
+            for (int i = h + 1; i < MAX_S; ++i) {
+                double f = matrix[i][k] / matrix[h][k];
+                matrix[i][k] = 0;
+                for (int j = k + 1; j <= MAX_S; ++j) {
+                    matrix[i][j] -= f * matrix[h][j];
+                }
+            }
+
+            ++h;
+            ++k;
+        }
+    }
+
+    double ans[MAX_S];
+    for (int i = 1; i < MAX_S; ++i) {
+        ans[i] = matrix[i][MAX_S] - matrix[i + 1][MAX_S];
+    }
+
+    ans[0] = 0.0;
+    ans[MAX_S] = 1.0;
 
     for (int i = 0; i < q.size(); ++i) {
         printf("%.5lf\n", matrix[q[i]][MAX_S]);
