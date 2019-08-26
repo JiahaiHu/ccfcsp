@@ -20,6 +20,15 @@ double pQ[MAX_N];   // pQ[i]: probability that Q plays i
 
 double matrix[5000][5000];  // coefficient matrix of equation group
 
+void show_matrix(int MAX_S) {
+    for (int i = 1; i < MAX_S; ++i) {
+        for (int j = 1; j <= MAX_S; ++j)
+            printf("%.2lf ", matrix[i][j]);
+        putchar('\n');
+    }
+    putchar('\n');
+}
+
 void calc_pX(int state, double* pX) {
     double S[MAX_N];
     double sum_S = 0;
@@ -28,13 +37,16 @@ void calc_pX(int state, double* pX) {
     }
     
     int _state = OPPO_STATE(state);
-    for (int i = 1; i <= n && CONTAIN(state,i); ++i) {
-        for (int j = 1; j <= n && CONTAIN(_state,j); ++j) {
+    for (int i = 1; i <= n; ++i) {
+        if (!CONTAIN(state,i)) continue;
+        for (int j = 1; j <= n; ++j) {
+            if (!CONTAIN(_state,j)) continue;
             S[i] += p[i][j];
         }
         sum_S += S[i];
     }
-    for (int i = 1; i <= n && CONTAIN(state,i); ++i) {
+    for (int i = 1; i <= n; ++i) {
+        if (!CONTAIN(state,i)) continue;
         pX[i] = S[i] / sum_S;
     }
 }
@@ -69,8 +81,11 @@ int main() {
         int _S = OPPO_STATE(S);
         calc_pX(S, pM);
         calc_pX(_S, pQ);
-        for (int i = 1; i <= n && CONTAIN(S,i); ++i) {
-            for (int j = 1; j <= n && CONTAIN(_S,j); ++j) {
+        // for (int i = 1; i <= n && CONTAIN(S,i); ++i) {   // FIXME: if in this way, unwork
+        for (int i = 1; i <= n; ++i) {
+            if (!CONTAIN(S,i)) continue;
+            for (int j = 1; j <= n; ++j) {
+                if (!CONTAIN(_S,j)) continue;
                 double p_win = p[i][j];
                 // M win and will get card j form Q
                 tp[S][j] += pM[i] * pQ[j] * p_win;
@@ -126,15 +141,21 @@ int main() {
             ++h;
             ++k;
         }
+        // show_matrix(MAX_S);
     }
 
-    double ans[MAX_S];
-    for (int i = 1; i < MAX_S; ++i) {
-        ans[i] = matrix[i][MAX_S] - matrix[i + 1][MAX_S];
+    for (int k = MAX_S - 1; k > 0; --k) {
+        matrix[k][MAX_S] /= matrix[k][k];
+        matrix[k][k] = 1;
+        for (int i = k - 1; i > 0; --i) {
+            matrix[i][MAX_S] -= matrix[i][k] * matrix[k][MAX_S];
+            matrix[i][k] = 0;
+        }
+        // show_matrix(MAX_S);
     }
 
-    ans[0] = 0.0;
-    ans[MAX_S] = 1.0;
+    matrix[0][MAX_S] = 0.0;
+    matrix[MAX_S][MAX_S] = 1.0;
 
     for (int i = 0; i < q.size(); ++i) {
         printf("%.5lf\n", matrix[q[i]][MAX_S]);
