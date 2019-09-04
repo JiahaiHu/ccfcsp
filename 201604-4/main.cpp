@@ -13,14 +13,10 @@ pair<int, int> direction[4] = {
 };
 
 int n, m, t;
-pair<int, int> unsafe[MAX_N + 1][MAX_N + 1];
+bool vis[MAX_N + 1][MAX_N + 1][301];
 
 bool _in(int r, int c) {
     return r > 0 && r <= n && c > 0 && c <= m;
-}
-
-bool _safe(int r, int c, int t) {
-    return t < unsafe[r][c].first || t > unsafe[r][c].second;
 }
 
 int main() {
@@ -28,11 +24,14 @@ int main() {
     while (t--) {
         int r, c, a, b;
         cin >> r >> c >> a >> b;
-        unsafe[r][c] = {a, b};
+        for (int i = a; i <= b; ++i) {
+            vis[r][c][i] = true;
+        }
     }
 
     queue<Step> step;
     step.push(Step(1, 1, 0));
+    vis[1][1][0] = true;
     while (!step.empty()) {
         Step s = step.front();
         step.pop();
@@ -46,8 +45,9 @@ int main() {
         for (int i = 0; i < 4; ++i) {
             int r = s.row + direction[i].first;
             int c = s.col + direction[i].second;
-            if (_in(r, c) && _safe(r, c, t)) {
+            if (_in(r, c) && !vis[r][c][t]) {
                 step.push(Step(r, c, t));
+                vis[r][c][t] = true;
             }
         }
     }
