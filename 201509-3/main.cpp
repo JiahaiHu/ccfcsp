@@ -23,11 +23,24 @@ int main() {
         VAR[name] = value;
     }
     for (string& s: html) {
-        for (auto& m: VAR) {
-            s = regex_replace(s, regex("\\{\\{ " + m.first + " \\}\\}"), m.second);
+        smatch result;
+        auto i = s.cbegin();
+        while (regex_search(i, s.cend(), result, regex("\\{\\{ ([^\\}]+) \\}\\}"))) {
+            while (i != result[0].first) {
+                cout << *i;
+                ++i;
+            }
+            auto v = VAR.find(result[1]);
+            if (v != VAR.end()) {
+                cout << v->second;
+            }
+            i = result[0].second;
         }
-        s = regex_replace(s, regex("\\{\\{ [^\\}]+ \\}\\}"), "");
-        puts(s.c_str());
+        while (i != s.cend()) {
+            cout << *i;
+            ++i;
+        }
+        cout << endl;
     }
     return 0;
 }
